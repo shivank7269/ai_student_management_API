@@ -18,28 +18,50 @@ def home():
         "message":"running sucessfully"
     }
 
-
-
-# ---ADD STUDENT---
-
-@app.post("/students")
-def create_students(student : Student):
+# create student (POST)
+@app.post('/students', response_model= Student)
+def create_student(student: Student):   #student is the request body and its type is Student(JSON object)
     students.append(student.model_dump())
+    return student
 
-#--- GET ALL STUDENT---
-@app.get("/students")
-def get_all_students():
+@app.get("/students",response_model=List[Student])
+def get_student():
     return students
 
-# --- GET STUDENT BY ID ---
-@app.get("/students/{student_id}")
+@app.get("/students/{student_id}",response_model = Student)
 def get_student(student_id : int):
-    result = [s for s in students if s["id"] == student_id]
+    if student_id<0 or student_id >= len(students):
+        raise HTTPException(
+            status_code = 404,
+            detail = "Student not found"
+        )
+    return students[student_id]
+
+@app.put("/students/{student_id}")
+def update_student(student_id : int, updated_student: Student):
+    if student_id<0 or student_id >= len(students):
+        raise HTTPException(
+            status_code = 404,
+            detail = "Student not found"
+        )
+    students[student_id] = updated_student
     return {
-        "result" : result
+        "message":"Student updated successfully",
+        "data": updated_student
     }
 
-
+@app.delete("/students/{student_id}")
+def delete_student(student_id : int):
+    if student_id<0 or student_id >= len(students):
+        raise HTTPException(
+            status_code = 404,
+            detail = "Student not found"
+        )
+    deleted_student=students.pop(student_id)
+    return {
+        "message":"Student deleted successfully",
+        "data": deleted_student
+    }
 # ----ANALYZE-FEEDBACK ---
 @app.post("/analyze-feedback")
 def analyze_feedback(feed: Feedback):
