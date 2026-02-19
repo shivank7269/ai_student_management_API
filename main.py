@@ -24,9 +24,12 @@ def create_student(student: Student):   #student is the request body and its typ
     students.append(student.model_dump())
     return student
 
-@app.get("/students",response_model=List[Student])
+@app.get("/students")
 def get_student():
-    return students
+    return {
+        "length":len(students),
+        "students":students
+    }
 
 @app.get("/students/{student_id}",response_model = Student)
 def get_student(student_id : int):
@@ -72,7 +75,7 @@ def analyze_feedback(feed: Feedback):
     }
 
 #---- SEARCH -----
-@app.post("/search")
+@app.get("/search")
 def search_students(query : str):
     result = smart_search(students,query)
 
